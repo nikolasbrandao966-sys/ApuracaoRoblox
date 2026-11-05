@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block titulo %}Enviar resultados — Eleições Roblox 2026{% endblock %}
+{% block conteudo %}
+<div class="conteudo-form">
+  <h1 class="titulo-pagina">Enviar resultados</h1>
+  <p class="subtitulo-pagina">Informe os <b>Dados Gerais</b> da apuração e os votos de cada candidato do turno selecionado.</p>
+  {% if eleicao_id %}
+  <form class="form" method="post" action="{{ url_for('resultados_enviar') }}">
+    <input type="hidden" name="eleicao_id" value="{{ eleicao_id }}">
+    <input type="hidden" name="turno" value="{{ turno }}">
+    <div class="seletor">
+      <a class="btn-secundario" href="{{ url_for('resultados_enviar', eleicao=eleicao_id, turno=('2' if turno == '1' else '1')) }}">
+        Trocar para o {{ '2º' if turno == '1' else '1º' }} turno
+      </a>
+      <a class="btn-secundario" href="{{ url_for('candidato_novo', eleicao=eleicao_id, turno=turno) }}">+ Novo candidato neste turno</a>
+    </div>
+
+    <section class="card">
+      <h2 class="card-titulo">Dados Gerais — {{ turno }}º turno</h2>
+      <div class="form-grid">
+        <div class="campo">
+          <label for="vagas">Número de vagas</label>
+          <input type="number" id="vagas" name="vagas" min="0" value="{{ stats.vagas if stats else 1 }}">
+        </div>
+        <div class="campo">
+          <label for="secoes">Total de seções</label>
+          <input type="number" id="secoes" name="secoes" min="0" value="{{ stats.secoes if stats else '' }}" placeholder="Ex.: 499248">
+        </div>
+        <div class="campo">
+          <label for="totalizadas">Seções totalizadas</label>
+          <input type="number" id="totalizadas" name="totalizadas" min="0" value="{{ stats.totalizadas if stats else '' }}">
+        </div>
+        <div class="campo">
+          <label for="eleitorado">Eleitorado geral</label>
+          <input type="number" id="eleitorado" name="eleitorado" min="0" value="{{ stats.eleitorado if stats else '' }}">
+        </div>
+        <div class="campo">
+          <label for="brancos">Votos em branco</label>
+          <input type="number" id="brancos" name="brancos" min="0" value="{{ stats.brancos if stats else 0 }}">
+        </div>
+        <div class="campo">
+          <label for="nulos">Votos nulos</label>
+          <input type="number" id="nulos" name="nulos" min="0" value="{{ stats.nulos if stats else 0 }}">
+        </div>
+        <div class="campo">
+          <label for="anulados">Votos anulados</label>
+          <input type="number" id="anulados" name="anulados" min="0" value="{{ stats.anulados if stats else 0 }}">
+        </div>
+        <div class="campo">
+          <label for="sub_judice">Anulados sub judice</label>
+          <input type="number" id="sub_judice" name="sub_judice" min="0" value="{{ stats.sub_judice if stats else 0 }}">
+        </div>
+        <div class="campo">
+          <label for="atualizado_em">Última atualização</label>
+          <input type="datetime-local" id="atualizado_em" name="atualizado_em"
+                 value="{{ stats.atualizado_em_br if stats and stats.atualizado_em_br else '' }}">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-titulo">Votação por candidato — {{ turno }}º turno</h2>
+      {% if cands %}
+      <table class="tabela">
+        <thead><tr><th>Candidato</th><th>Partido</th><th>Votos</th><th>Eleito?</th></tr></thead>
+        <tbody>
+          {% for c in cands %}
+          <tr>
+            <td>{{ c.nome }}</td>
+            <td>{{ c.partido }}{% if c.numero %} – {{ c.numero }}{% endif %}</td>
+            <td><input class="inp-votos" type="number" min="0" step="1"
+                       name="votos_{{ c.id }}" value="{{ c.votos }}"></td>
+            <td class="td-check"><input type="checkbox" name="eleito_{{ c.id }}" {{ 'checked' if c.eleito }}></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="hint">Nenhum candidato cadastrado neste turno. Use <b>+ Novo candidato neste turno</b> para cadastrar antes de enviar os votos.</p>
+      {% endif %}
+      <div class="form-acoes">
+        <button type="submit" class="btn-primario">Salvar resultados</button>
+        <a class="btn-secundario" href="{{ url_for('resultados', eleicao=eleicao_id, turno=turno) }}">Ver página de resultados</a>
+      </div>
+    </section>
+  </form>
+  {% else %}
+  <div class="card vazio">
+    <h2 class="card-titulo cinza">Nenhuma eleição cadastrada</h2>
+    <p>Importe um arquivo JSON em <a href="{{ url_for('arquivos') }}">Arquivos de Urna</a> para criar a primeira eleição,
+       ou cadastre um candidato — a eleição padrão é criada automaticamente.</p>
+    <div class="vazio-acoes">
+      <a class="btn-primario" href="{{ url_for('candidato_novo') }}">+ Enviar candidato</a>
+      <a class="btn-secundario" href="{{ url_for('arquivos') }}">Arquivos de Urna</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

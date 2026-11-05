@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}Eleições Roblox 2026{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23F8C300'/><text x='50' y='70' font-size='54' font-weight='900' text-anchor='middle' font-family='Arial' fill='%23333'>26</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="logo" href="{{ url_for('resultados') }}" title="Eleições Roblox 2026">
+      <span class="logo-top">ELEIÇÕES ROBLOX</span>
+      <span class="logo-ano">2026</span>
+      <span class="logo-sub">SIMULAÇÃO ELEITORAL</span>
+    </a>
+    <div class="election-picker">
+      <button type="button" class="election-btn" id="electionBtn">
+        {{ eleicao_atual.nome if eleicao_atual else 'Eleição Geral Ordinária 2026' }}
+        <svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="election-menu" id="electionMenu">
+        {% for e in menu_eleicoes %}
+        <a href="{{ url_for('resultados', eleicao=e.id, turno=turno_atual) }}">{{ e.nome }}</a>
+        {% endfor %}
+        <a href="{{ url_for('resultados_enviar') }}" class="menu-nova">+ Nova eleição (enviar resultados)</a>
+      </div>
+    </div>
+  </div>
+  <nav class="menu">
+    <a href="{{ url_for('resultados') }}" class="{{ 'ativo' if pagina == 'resultados' }}">Resultados</a>
+    <a href="{{ url_for('candidatos') }}" class="{{ 'ativo' if pagina == 'candidatos' }}">Perfis Salvos</a>
+    <a href="{{ url_for('resumo') }}" class="{{ 'ativo' if pagina == 'resumo' }}">Resumo Geral</a>
+    <a href="{{ url_for('arquivos') }}" class="{{ 'ativo' if pagina == 'arquivos' }}">Arquivos de Urna</a>
+  </nav>
+</header>
+{% block subbar %}{% endblock %}
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}<div class="flash-area">{% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+<main>
+{% block conteudo %}{% endblock %}
+</main>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

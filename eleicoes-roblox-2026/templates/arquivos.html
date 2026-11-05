@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}Arquivos de Urna — Eleições Roblox 2026{% endblock %}
+{% block conteudo %}
+<div class="conteudo-form">
+  <h1 class="titulo-pagina">Arquivos de Urna</h1>
+  <p class="subtitulo-pagina">Importe candidatos e resultados de uma vez (por arquivo ou por link) ou exporte os dados do banco em JSON.</p>
+
+  <section class="card">
+    <h2 class="card-titulo">Exportar dados</h2>
+    <p>Baixe todos os dados cadastrados (eleições, dados gerais e candidatos) em um arquivo JSON:</p>
+    <div class="vazio-acoes">
+      <a class="btn-primario" href="{{ url_for('arquivos_exportar') }}">⬇ Exportar JSON</a>
+      <a class="btn-secundario" href="{{ url_for('api_resultados', eleicao=eleicao.id if eleicao else none) }}" target="_blank">Ver API de resultados (link)</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card-titulo">Importar por arquivo</h2>
+    <form class="form-linha" method="post" enctype="multipart/form-data" action="{{ url_for('arquivos') }}">
+      <input type="hidden" name="acao" value="arquivo">
+      <input type="file" name="arquivo_json" accept=".json,application/json" required>
+      <button type="submit" class="btn-primario">Importar arquivo</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2 class="card-titulo">Importar por link</h2>
+    <p>Informe a URL de um JSON publicado na internet (mesmo formato do export; limite de 2 MB):</p>
+    <form class="form-linha" method="post" action="{{ url_for('arquivos') }}">
+      <input type="hidden" name="acao" value="link">
+      <input type="url" name="url" placeholder="https://exemplo.com/resultados.json" required class="inp-largo">
+      <button type="submit" class="btn-primario">Importar do link</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2 class="card-titulo">Formato do JSON</h2>
+    <pre class="codigo">{
+  "eleicao": "Eleição Geral Ordinária 2026",
+  "ano": 2026,
+  "turno": "2",
+  "cargo": "PRESIDENTE",
+  "dados_gerais": {
+    "vagas": 1, "secoes": 499248, "totalizadas": 499248,
+    "eleitorado": 158745508, "brancos": 1430496, "nulos": 2723305,
+    "anulados": 0, "sub_judice": 0,
+    "atualizado_em": "25/10/2026 23:26:38"
+  },
+  "candidatos": [
+    { "nome": "LULA", "partido": "PT", "numero": 13,
+      "votos": 64256232, "eleito": true,
+      "foto_url": "https://exemplo.com/foto.png" },
+    { "nome": "FLAVIO BOLSONARO", "partido": "PL", "numero": 22,
+      "votos": 59826041, "eleito": false }
+  ]
+}</pre>
+    <p class="hint">Candidatos já existentes (mesmo nome, eleição e turno) são <b>atualizados</b>; os novos são inseridos.
+       Se a eleição informada não existir, ela é criada automaticamente.</p>
+  </section>
+</div>
+{% endblock %}

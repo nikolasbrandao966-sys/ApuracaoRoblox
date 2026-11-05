@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Perfis Salvos — Eleições Roblox 2026{% endblock %}
+{% block conteudo %}
+<div class="conteudo-form">
+  <div class="acoes-pagina">
+    <h1 class="titulo-pagina">Perfis Salvos</h1>
+    <div class="acoes-direita">
+      <a class="btn-secundario" href="{{ url_for('resultados_enviar', eleicao=eleicao.id if eleicao else none) }}">Enviar resultados</a>
+      <a class="btn-primario" href="{{ url_for('candidato_novo', eleicao=eleicao.id if eleicao else none) }}">+ Enviar candidato</a>
+    </div>
+  </div>
+  {% if perfis %}
+  <p class="subtitulo-pagina">Candidatos cadastrados em <b>{{ eleicao.nome }}</b> — clique em Editar para alterar dados e fotos.</p>
+  <div class="perfis-grid">
+    {% for c in perfis %}
+    <div class="card perfil-card">
+      <div class="perfil-topo">
+        {% if c.foto %}
+        <img class="perfil-foto" src="{{ c.foto }}" alt="Foto de {{ c.nome }}">
+        {% else %}
+        <span class="perfil-foto foto-inicial" style="background: {{ c.cor }};">{{ c.iniciais }}</span>
+        {% endif %}
+        <div>
+          <p class="cand-partido">{{ c.partido }}{% if c.numero %} &ndash; {{ c.numero }}{% endif %} · {{ c.cargo }}</p>
+          <h3 class="cand-nome menor">{{ c.nome }}</h3>
+          <span class="pill {{ 'pill-eleito' if c.eleito else 'pill-nao' }}">{{ 'Eleito' if c.eleito else 'Não eleito' }}</span>
+        </div>
+      </div>
+      <p class="perfil-detalhe">{{ c.turno }}º turno · {{ c.votos | fmt }} votos{% if c.pct %} ({{ c.pct | pct }}){% endif %}</p>
+      {% if c.foto and c.foto.startswith('http') %}<p class="perfil-detalhe fonte-link">Foto por link</p>
+      {% elif c.foto %}<p class="perfil-detalhe fonte-link">Foto enviada por upload</p>{% endif %}
+      <div class="perfil-acoes">
+        <a class="btn-mini" href="{{ url_for('candidato_editar', cid=c.id) }}">Editar</a>
+        <form class="confirmar" method="post" action="{{ url_for('candidato_excluir', cid=c.id) }}">
+          <button type="submit" class="btn-mini perigo">Excluir</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card vazio">
+    <h2 class="card-titulo cinza">Nenhum candidato salvo ainda</h2>
+    <p>Use o botão <b>+ Enviar candidato</b> para cadastrar: você pode enviar a foto por upload de arquivo ou por link.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

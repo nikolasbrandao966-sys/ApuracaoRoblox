@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block subbar %}
+<div class="subbar">
+  <button type="button" class="local-pill" title="Escopo da apuração">
+    <svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#F8C300" d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+    <span>Brasil</span>
+    <svg class="ic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="#F8C300" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+  </button>
+  <div class="turno">
+    <span class="turno-label">Turno</span>
+    <div class="turno-btns">
+      <a class="turno-btn {{ 'ativo' if turno == '1' }}" href="{{ url_for('resultados', eleicao=eleicao.id if eleicao else none, turno='1') }}">1º</a>
+      <a class="turno-btn {{ 'ativo' if turno == '2' }}" href="{{ url_for('resultados', eleicao=eleicao.id if eleicao else none, turno='2') }}">2º</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block conteudo %}
+<div class="cargo-row"><span class="cargo-badge">{{ cargo }}</span></div>
+<div class="layout">
+  <aside class="coluna-esquerda">
+    <section class="card">
+      <h2 class="card-titulo">Dados Gerais</h2>
+      <p class="atualizacao">Última atualização {{ stats.atualizado_em or '—' }} (Horário local)</p>
+      <div class="linha"><span>Número de vagas</span><b>{{ stats.vagas }}</b></div>
+      <div class="linha"><span>Total de seções</span><b>{{ stats.secoes | fmt }}</b></div>
+      <div class="linha"><span>Seções totalizadas</span><b>{{ stats.totalizadas | fmt }}</b></div>
+      <div class="barra">
+        <div class="barra-fill" style="width: {{ pct_secoes | pct_css if pct_secoes <= 100 else '100%' }};"></div>
+        <span class="barra-txt">{{ pct_secoes | pct }}</span>
+      </div>
+    </section>
+    <section class="card">
+      <h2 class="card-titulo cinza">Votação</h2>
+      <div class="barra-multi">
+        <span class="seg verde" style="width: {{ pct_nominais | pct_css }};"></span>
+        <span class="seg azul" style="width: {{ ((stats.brancos / total * 100) if total else 0) | pct_css }};"></span>
+        <span class="seg lilas" style="width: {{ ((stats.nulos / total * 100) if total else 0) | pct_css }};"></span>
+        <span class="seg vermelho" style="width: {{ ((stats.anulados / total * 100) if total else 0) | pct_css }};"></span>
+        <span class="seg amarelo" style="width: {{ ((stats.sub_judice / total * 100) if total else 0) | pct_css }};"></span>
+      </div>
+      <p class="total-votos"><b>{{ total | fmt }}</b> Votos</p>
+      <div class="linha nominais">
+        <span>Nominais</span>
+        <div class="val"><b>{{ pct_nominais | pct }}</b><small>{{ nominais | fmt }}</small></div>
+      </div>
+      <div class="legenda"><span class="quad verde"></span><span class="nome">Válidos</span><span class="val"><b class="simples">{{ validos | fmt }}</b></span></div>
+      <div class="legenda"><span class="quad vermelho"></span><span class="nome">Anulados</span><span class="val"><b class="simples">{{ stats.anulados | fmt }}</b></span></div>
+      <div class="legenda"><span class="quad amarelo"></span><span class="nome">Anulados Sub judice</span><span class="val"><b class="simples">{{ stats.sub_judice | fmt }}</b></span></div>
+      <div class="legenda"><span class="quad azul"></span><span class="nome">Em Branco</span><div class="val"><b>{{ ((stats.brancos / total * 100) if total else 0) | pct }}</b><small>{{ stats.brancos | fmt }}</small></div></div>
+      <div class="legenda"><span class="quad lilas"></span><span class="nome">Nulos</span><div class="val"><b>{{ ((stats.nulos / total * 100) if total else 0) | pct }}</b><small>{{ stats.nulos | fmt }}</small></div></div>
+    </section>
+    <section class="card">
+      <h2 class="card-titulo cinza">Eleitorado geral</h2>
+      <p class="eleitorado-num">{{ stats.eleitorado | fmt }}</p>
+      <div class="linha nominais">
+        <span>Comparecimento</span>
+        <div class="val"><b>{{ pct_comparecimento | pct }}</b><small>{{ comparecimento | fmt }}</small></div>
+      </div>
+      <div class="linha nominais">
+        <span>Abstenção</span>
+        <div class="val"><b>{{ pct_abstencao | pct }}</b><small>{{ abstencao | fmt }}</small></div>
+      </div>
+    </section>
+  </aside>
+  <section class="coluna-direita">
+    <div class="topo-resultados">
+      <div class="tab-strip"><span class="tab-nominal">NOMINAL</span></div>
+      <div class="acoes">
+        <button type="button" class="btn-icone" id="btnInfo" title="Informações">
+          <svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#fff" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        </button>
+        <button type="button" class="btn-icone" id="btnBusca" title="Buscar candidato">
+          <svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" d="M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zm5.2 11.7L21 21"/></svg>
+        </button>
+        <button type="button" class="btn-atualizar" onclick="location.reload()">
+          <svg class="ic" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="none" stroke="#F0AE00" stroke-width="2.2" stroke-linecap="round" d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4"/></svg>
+          Atualizar
+        </button>
+      </div>
+    </div>
+    <input type="text" id="buscaInput" class="busca-input" placeholder="Buscar candidato pelo nome..." hidden>
+    <div id="infoPopover" class="popover" hidden>
+      <b>Eleições Roblox 2026</b> — site de simulação eleitoral. Os resultados exibidos são
+      enviados pelos próprios usuários em <a href="{{ url_for('resultados_enviar') }}">Enviar resultados</a>
+      e os perfis dos candidatos em <a href="{{ url_for('candidato_novo') }}">Enviar candidato</a>.
+      Também é possível importar dados prontos por arquivo ou link em <a href="{{ url_for('arquivos') }}">Arquivos de Urna</a>.
+    </div>
+    {% if candidatos %}
+    <div class="cards-candidatos">
+      {% for c in candidatos %}
+      <article class="cand-card {{ 'vencedor' if loop.first }}" data-nome="{{ c.nome | lower }}">
+        <div class="cand-esq">
+          <div class="foto-wrap {{ 'grande' if loop.first }}">
+            <svg class="anel" viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="46" fill="none" stroke="#F5B70A" stroke-width="5.4"
+                      stroke-linecap="round" pathLength="100" stroke-dasharray="78 22"
+                      transform="rotate(-5.5 50 50)"/>
+            </svg>
+            {% if c.foto %}
+            <img class="foto" src="{{ c.foto }}" alt="Foto de {{ c.nome }}">
+            {% else %}
+            <span class="foto foto-inicial" style="background: {{ c.cor }};">{{ c.iniciais }}</span>
+            {% endif %}
+          </div>
+          <p class="cand-partido">{{ c.partido }}{% if c.numero %} &ndash; {{ c.numero }}{% endif %}</p>
+          <h3 class="cand-nome">{{ c.nome }}</h3>
+          <span class="pill {{ 'pill-eleito' if c.eleito else 'pill-nao' }}">{{ 'Eleito' if c.eleito else 'Não eleito' }}</span>
+        </div>
+        <div class="cand-dir">
+          <p class="cand-pct">{{ c.pct | pct }}</p>
+          <p class="cand-votos">{{ c.votos | fmt }} votos</p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card vazio">
+      <h2 class="card-titulo cinza">Nenhum resultado para este turno</h2>
+      <p>Envie candidatos e os votos apurados para vê-los aqui.</p>
+      <div class="vazio-acoes">
+        <a class="btn-primario" href="{{ url_for('candidato_novo', eleicao=eleicao.id if eleicao else none, turno=turno) }}">+ Enviar candidato</a>
+        <a class="btn-secundario" href="{{ url_for('resultados_enviar', eleicao=eleicao.id if eleicao else none, turno=turno) }}">Enviar resultados</a>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

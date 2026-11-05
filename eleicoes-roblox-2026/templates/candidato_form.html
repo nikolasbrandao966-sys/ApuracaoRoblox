@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar candidato' if c else 'Enviar candidato' }} — Eleições Roblox 2026{% endblock %}
+{% block conteudo %}
+<div class="conteudo-form">
+  <h1 class="titulo-pagina">{{ 'Editar candidato' if c else 'Enviar candidato' }}</h1>
+  <p class="subtitulo-pagina">Preencha os dados do candidato e envie a foto <b>por upload de arquivo</b> ou <b>por link (URL)</b>.</p>
+  <form class="card form" method="post" enctype="multipart/form-data"
+        action="{{ url_for('candidato_editar', cid=c.id) if c else url_for('candidato_novo') }}">
+    <div class="form-grid">
+      <div class="campo">
+        <label for="nome">Nome do candidato *</label>
+        <input type="text" id="nome" name="nome" required maxlength="80"
+               value="{{ c.nome if c else '' }}" placeholder="Ex.: Bloxy Silva">
+      </div>
+      <div class="campo">
+        <label for="partido">Partido / sigla *</label>
+        <input type="text" id="partido" name="partido" required maxlength="12"
+               value="{{ c.partido if c else '' }}" placeholder="Ex.: RBX">
+      </div>
+      <div class="campo">
+        <label for="numero">Número do candidato</label>
+        <input type="number" id="numero" name="numero" min="1" max="99"
+               value="{{ c.numero if c and c.numero else '' }}" placeholder="Ex.: 10">
+      </div>
+      <div class="campo">
+        <label for="cargo">Cargo</label>
+        <select id="cargo" name="cargo">
+          {% for op in ['PRESIDENTE','GOVERNADOR','SENADOR','PREFEITO','DEPUTADO FEDERAL','DEPUTADO ESTADUAL'] %}
+          <option value="{{ op }}" {{ 'selected' if c and c.cargo == op }}>{{ op | title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="campo">
+        <label for="eleicao_id">Eleição</label>
+        <select id="eleicao_id" name="eleicao_id">
+          {% for e in eleicoes %}
+          <option value="{{ e.id }}" {{ 'selected' if (c and c.eleicao_id == e.id) or (not c and eleicao_selecionada == e.id) }}>{{ e.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="campo">
+        <label>Turno</label>
+        <div class="turno-btns form-turno">
+          <label class="turno-btn {{ 'ativo' if (c.turno if c else turno_sel) == '1' }}">
+            <input type="radio" name="turno" value="1" {{ 'checked' if (c.turno if c else turno_sel) == '1' }}> 1º
+          </label>
+          <label class="turno-btn {{ 'ativo' if (c.turno if c else turno_sel) == '2' }}">
+            <input type="radio" name="turno" value="2" {{ 'checked' if (c.turno if c else turno_sel) == '2' }}> 2º
+          </label>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="votos">Votos recebidos</label>
+        <input type="number" id="votos" name="votos" min="0" step="1"
+               value="{{ c.votos if c else 0 }}" placeholder="Ex.: 64256232">
+      </div>
+      <div class="campo campo-check">
+        <label class="check">
+          <input type="checkbox" name="eleito" {{ 'checked' if c and c.eleito }}>
+          Candidato eleito
+        </label>
+      </div>
+    </div>
+
+    <div class="campo campo-foto">
+      <label>Foto do candidato</label>
+      <div class="foto-linha">
+        {% if c %}
+        {% if c.foto_arquivo %}
+        <img class="foto-preview" src="{{ url_for('fotos', nome=c.foto_arquivo) }}" alt="Foto atual" id="fotoPreview">
+        {% elif c.foto_url %}
+        <img class="foto-preview" src="{{ c.foto_url }}" alt="Foto atual" id="fotoPreview">
+        {% else %}
+        <span class="foto-preview foto-inicial" style="background: #8f8f8f;">{{ (c.nome[:2] | upper) if c else '?' }}</span>
+        {% endif %}
+        {% else %}
+        <img class="foto-preview" src="" alt="" id="fotoPreview" style="display:none;">
+        <span class="foto-preview foto-inicial" style="background:#8f8f8f;" id="fotoPlaceholder">?</span>
+        {% endif %}
+        <div class="foto-opcoes">
+          <p class="hint"><b>Opção 1 — Upload:</b></p>
+          <input type="file" id="fotoArquivo" name="foto_arquivo" accept=".png,.jpg,.jpeg,.gif,.webp,image/*">
+          <p class="hint"><b>Opção 2 — Link da foto (URL):</b></p>
+          <input type="url" id="foto_url" name="foto_url" placeholder="https://exemplo.com/foto.png"
+                 value="{{ c.foto_url if c else '' }}">
+          <p class="hint">Se os dois forem preenchidos, o arquivo enviado tem prioridade. PNG, JPG, GIF ou WEBP até 8&nbsp;MB.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn-primario">{{ 'Salvar alterações' if c else 'Salvar candidato' }}</button>
+      <a class="btn-secundario" href="{{ url_for('candidatos') }}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
